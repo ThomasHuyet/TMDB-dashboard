@@ -42,6 +42,11 @@ TMDB_API_KEY="votre_clef_tmdb"
 PORT=3000
 ```
 
+Installer les dépendances Node.js
+```bash
+npm install
+```
+
 Lancer le serveur :
 ```bash
 npm start
