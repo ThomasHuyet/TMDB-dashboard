@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Movie Dashboard – MongoDB + TMDB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body class="theme-dark">
+    <div class="app-shell">
+      <div class="app-container">
+        <header class="app-header">
+          <div class="app-header-main">
+            <div class="app-header-left">
+              <div class="app-title-row">
+                <span class="app-icon">🎬</span>
+                <h1 class="app-title">Movie Dashboard</h1>
+                <span class="app-badge">API TMDB</span>
+              </div>
+            </div>
+
+            <div class="app-header-right">
+              <span id="realtime-status">Temps réel : déconnecté</span>
+              <button id="theme-toggle" type="button">🌙 Mode sombre</button>
+            </div>
+          </div>
+
+          <nav class="app-tabs">
+            <button class="tab-btn active" data-tab="overview">Vue d'ensemble</button>
+            <button class="tab-btn" data-tab="search">RECHERCHE</button>
+            <button class="tab-btn" data-tab="stats">STATISTIQUES</button>
+            <button class="tab-btn" data-tab="history">HISTORIQUE</button>
+          </nav>
+        </header>
+
+        <main>
+          <section id="tab-overview" class="tab-content active">
+            <div class="section">
+              <div class="section-header">
+                <span class="section-icon">📊</span>
+                <h2 class="section-title">Indicateurs principaux</h2>
+              </div>
+
+              <div class="section-card">
+                <div id="kpi-container"></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <span class="section-icon">🎯</span>
+                <h2 class="section-title">Vue d’ensemble des performances</h2>
+              </div>
+
+              <div class="charts-grid-2">
+                <div class="chart-container">
+                  <div class="section-header">
+                    <span class="section-icon">💰</span>
+                    <h3 class="section-title">Budget &amp; recettes</h3>
+                    <p class="section-subtitle">
+                      Positionnement des films en fonction de leur budget et de
+                      leurs recettes (échelles logarithmiques).
+                    </p>
+                  </div>
+                  <div id="chart-budget-revenue" class="chart-root"></div>
+                </div>
+
+                <div class="chart-container">
+                  <div class="section-header">
+                    <span class="section-icon">📅</span>
+                    <h3 class="section-title">Sorties à venir</h3>
+                    <p class="section-subtitle">
+                      Classement des prochains films selon leur popularité TMDB.
+                    </p>
+                  </div>
+
+                  <div id="chart-upcoming-timeline" class="chart-donut"></div>
+                </div>
+
+
+              </div>
+            </div>
+          </section>
+
+          <section id="tab-search" class="tab-content">
+            <div class="section">
+              <div class="section-header">
+                <span class="section-icon">🔍</span>
+                <h2 class="section-title">Recherche de films</h2>
+              </div>
+
+              <div class="section-card">
+                <div class="filters-row">
+                  <div class="filter-field">
+                    <label class="filter-label" for="search-input">
+                      Titre du film
+                    </label>
+                    <input
+                      id="search-input"
+                      class="filter-input"
+                      type="text"
+                      placeholder="Rechercher un film..."
+                    />
+                  </div>
+
+                  <div class="filter-field">
+                    <label class="filter-label" for="genre-filter">Genre</label>
+                    <select id="genre-filter" class="filter-select">
+                      <option value="">Tous les genres</option>
+                    </select>
+                  </div>
+
+                  <div class="filter-field">
+                    <label class="filter-label" for="year-filter">Année</label>
+                    <input
+                      id="year-filter"
+                      class="filter-input"
+                      type="number"
+                      placeholder="Ex : 2023"
+                    />
+                  </div>
+
+                  <div class="filter-field">
+                    <label class="filter-label" for="popularity-filter">
+                      Popularité minimale
+                    </label>
+                    <input
+                      id="popularity-filter"
+                      class="filter-input"
+                      type="number"
+                      step="1"
+                      placeholder="Ex : 50"
+                    />
+                  </div>
+
+                  <button id="apply-filters" type="button">Appliquer</button>
+                </div>
+
+                <div id="movie-results"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="tab-stats" class="tab-content">
+            <div class="section">
+              <div class="section-header">
+                <span class="section-icon">🔥</span>
+                <h2 class="section-title">Popularité par genre</h2>
+              </div>
+
+              <div class="charts-grid-2">
+                <div class="chart-container">
+                  <div class="section-header">
+                    <h3 class="section-title">Classement des genres</h3>
+                    <p class="section-subtitle">
+                      Popularité moyenne par genre, triée du plus fort au plus
+                      faible.
+                    </p>
+                  </div>
+                  <div id="chart-genre-popularity" class="chart-root"></div>
+                </div>
+
+                <div class="chart-container">
+                  <div class="section-header">
+                    <h3 class="section-title">Part de popularité par genre</h3>
+                    <p class="section-subtitle">
+                      Répartition de la popularité totale entre les différents
+                      genres.
+                    </p>
+                  </div>
+                  <div id="chart-genre-popularity-2" class="chart-root"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="charts-grid-2">
+                <div class="chart-container">
+                  <div class="section-header">
+                    <span class="section-icon">🎭</span>
+                    <h3 class="section-title">Acteurs les plus présents</h3>
+                    <p class="section-subtitle">
+                      Nombre de films dans lesquels chaque acteur apparaît.
+                    </p>
+                  </div>
+                  <div id="chart-top-actors" class="chart-root"></div>
+                </div>
+
+                <div class="chart-container">
+                  <div class="section-header">
+                    <span class="section-icon">🔑</span>
+                    <h3 class="section-title">Mots-clés (Top 30)</h3>
+                    <p class="section-subtitle">
+                      Nuage de mots basé sur la fréquence d’utilisation des
+                      mots‑clés TMDB.
+                    </p>
+                  </div>
+                  <div id="chart-keywords" class="chart-root"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="tab-history" class="tab-content">
+            <div class="section">
+              <div class="section-header">
+                <span class="section-icon">📈</span>
+                <h2 class="section-title">Historique des tendances</h2>
+              </div>
+
+              <div class="section-card">
+                <div class="history-controls">
+                  <div class="filter-field">
+                    <label class="filter-label" for="history-window">
+                      Fenêtre de trending
+                    </label>
+                    <select id="history-window">
+                      <option value="day">Jour (trending/day)</option>
+                      <option value="week">Semaine (trending/week)</option>
+                    </select>
+                  </div>
+
+                  <div class="filter-field">
+                    <label class="filter-label" for="history-days">
+                      Période (en jours)
+                    </label>
+                    <input
+                      id="history-days"
+                      type="number"
+                      min="1"
+                      max="365"
+                      value="30"
+                    />
+                  </div>
+
+                  <button id="history-apply" type="button">
+                    Mettre à jour
+                  </button>
+                </div>
+
+                <div class="charts-grid-2">
+                  <div class="chart-container">
+                    <div class="section-header">
+                      <h3 class="section-title">
+                        Historique des trending
+                      </h3>
+                      <p class="section-subtitle">
+                        Évolution du nombre de films en tendance dans le temps.
+                      </p>
+                    </div>
+                    <div
+                      id="chart-history-trending-count"
+                      class="chart-root"
+                    ></div>
+                  </div>
+
+                  <div class="chart-container">
+                    <div class="section-header">
+                      <h3 class="section-title">
+                        Historique de la popularité par genre
+                      </h3>
+                      <p class="section-subtitle">
+                        Variation de la popularité moyenne des principaux genres
+                        sur la période sélectionnée.
+                      </p>
+                    </div>
+                    <div
+                      id="chart-history-genres-avg"
+                      class="chart-root"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/scripts.js"></script>
+  </body>
+</html>
